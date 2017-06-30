@@ -1,0 +1,912 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "RESTful APIs of the Donders Research Data Repository",
+    "version" : "1.0.0",
+    "title" : "DRDR RESTful APIs",
+    "contact" : {
+      "email" : "datasupport@donders.ru.nl"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "tags" : [ {
+    "name" : "collection",
+    "description" : "Operations for DRDR collections"
+  }, {
+    "name" : "user",
+    "description" : "Operations on DRDR users"
+  }, {
+    "name" : "vocabulary",
+    "description" : "Operations on control vocabularies"
+  } ],
+  "paths" : {
+    "/collection/public" : {
+      "get" : {
+        "tags" : [ "collection" ],
+        "summary" : "Get list of published Data Sharing Collections",
+        "description" : "",
+        "operationId" : "getPublishedCollections",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "select",
+          "description" : "Get `all` or `featured` collections",
+          "required" : true,
+          "type" : "string",
+          "default" : "all"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/CollectionIn"
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        }
+      }
+    },
+    "/collection" : {
+      "get" : {
+        "tags" : [ "collection" ],
+        "summary" : "Get list of my collections",
+        "description" : "`mode` parameter can be either `user` or `admin`",
+        "operationId" : "getListOfCollections",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "mode",
+          "in" : "query",
+          "description" : "Get my collections in `user` or `admin` mode",
+          "required" : true,
+          "type" : "string",
+          "default" : "user"
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/CollectionOut"
+              }
+            }
+          },
+          "500" : {
+            "description" : "internal server error"
+          },
+          "400" : {
+            "description" : "invalid status value"
+          },
+          "401" : {
+            "description" : "unauthorised operation"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "collection" ],
+        "summary" : "Create a new collection with provided data",
+        "operationId" : "createCollection",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "data",
+          "description" : "collection object",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CollectionIn"
+          }
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/CollectionOut"
+            }
+          },
+          "500" : {
+            "description" : "Internal server error"
+          },
+          "401" : {
+            "description" : "Unauthorised operation"
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/collection/search" : {
+      "post" : {
+        "tags" : [ "collection" ],
+        "summary" : "Search collections",
+        "description" : "Returns collections matching the searching criteria",
+        "operationId" : "searchCollection",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "data",
+          "description" : "Query",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Query"
+          }
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/CollectionOut"
+              }
+            }
+          },
+          "400" : {
+            "description" : "invalid query supplied"
+          },
+          "401" : {
+            "description" : "unauthorised operation"
+          },
+          "500" : {
+            "description" : "internal service error"
+          }
+        }
+      }
+    },
+    "/collection/{collectionIdentifier}" : {
+      "get" : {
+        "tags" : [ "collection" ],
+        "summary" : "Get a collection",
+        "description" : "Returns the detail of a single collection",
+        "operationId" : "getCollection",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "collectionIdentifier",
+          "in" : "path",
+          "description" : "Identifier of the collection",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/CollectionOut"
+            }
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "401" : {
+            "description" : "Unauthorised operation"
+          },
+          "404" : {
+            "description" : "Collection not found"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "collection" ],
+        "summary" : "Update attributes of a collection",
+        "description" : "",
+        "operationId" : "updateCollectionMetadata",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "collectionIdentifier",
+          "in" : "path",
+          "description" : "Identifier of the collection",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "data",
+          "in" : "body",
+          "description" : "collection object",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/CollectionIn"
+          }
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/CollectionOut"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorised operation"
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/collection/{collectionIdentifier}/state" : {
+      "put" : {
+        "tags" : [ "collection" ],
+        "summary" : "Set collection state",
+        "description" : "",
+        "operationId" : "setCollectionState",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "collectionIdentifier",
+          "in" : "path",
+          "description" : "collection identifier",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "new collection state",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/CollectionOut"
+            }
+          },
+          "500" : {
+            "description" : "internal server error"
+          },
+          "401" : {
+            "description" : "Unauthorised operation"
+          },
+          "405" : {
+            "description" : "operation not allowed"
+          }
+        }
+      }
+    },
+    "/user" : {
+      "post" : {
+        "tags" : [ "user" ],
+        "summary" : "Create new user with IdP attributes",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "data",
+          "in" : "body",
+          "description" : "IdP user attributes",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/UserIdP"
+          }
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/UserOut"
+            }
+          },
+          "401" : {
+            "description" : "unauthorised operation"
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      }
+    },
+    "/user/{userName}" : {
+      "get" : {
+        "tags" : [ "user" ],
+        "summary" : "Get user object",
+        "description" : "",
+        "operationId" : "getUser",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "userName",
+          "in" : "path",
+          "description" : "name of the user",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/UserOut"
+            }
+          },
+          "401" : {
+            "description" : "unauthorised operation"
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "user" ],
+        "summary" : "update user profile",
+        "description" : "",
+        "operationId" : "updateUserProfile",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "userName",
+          "in" : "path",
+          "description" : "name of the user",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "data",
+          "in" : "body",
+          "description" : "user profile object",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/UserIn"
+          }
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/UserOut"
+            }
+          },
+          "401" : {
+            "description" : "unauthorised operation"
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      }
+    },
+    "/keywords/{vocabularyName}" : {
+      "get" : {
+        "tags" : [ "vocabulary" ],
+        "summary" : "Get keywords of a vocabulary",
+        "description" : "",
+        "operationId" : "getKeywords",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "vocabularyName",
+          "in" : "path",
+          "description" : "name of vocabulary",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Keywords"
+            }
+          },
+          "404" : {
+            "description" : "vocabulary not found"
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "vocabulary" ],
+        "summary" : "Create or update keywords of a vocabulary",
+        "description" : "",
+        "operationId" : "setKeywords",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "vocabularyName",
+          "in" : "path",
+          "description" : "name of vocabulary",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "data",
+          "in" : "body",
+          "description" : "list of keywords",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Keywords"
+          }
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Keywords"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorised operation"
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      }
+    },
+    "/publication_systems" : {
+      "get" : {
+        "tags" : [ "vocabulary" ],
+        "summary" : "Get the supported publication systems",
+        "description" : "",
+        "operationId" : "getPublicationSystems",
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/PublicationSystems"
+            }
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "vocabulary" ],
+        "summary" : "Add a new publication system",
+        "description" : "",
+        "operationId" : "addPublicationSystem",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "data",
+          "in" : "body",
+          "description" : "publication system object",
+          "schema" : {
+            "$ref" : "#/definitions/PublicationSystem"
+          }
+        } ],
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/PublicationSystems"
+            }
+          },
+          "401" : {
+            "description" : "unauthorized operation"
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "Keywords" : {
+      "description" : "list of keywords",
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "keyword" : {
+            "type" : "string",
+            "description" : "full name/description of the keyword"
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "keyword identifier"
+          }
+        }
+      }
+    },
+    "PublicationSystems" : {
+      "description" : "list of publication systems",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/PublicationSystem"
+      }
+    },
+    "PublicationSystem" : {
+      "description" : "publication system object",
+      "type" : "object",
+      "properties" : {
+        "system" : {
+          "type" : "string",
+          "description" : "publication system name"
+        },
+        "pidType" : {
+          "type" : "string",
+          "description" : "publication system type"
+        },
+        "uriPrefix" : {
+          "type" : "string",
+          "description" : "publication system URI prefix"
+        }
+      }
+    },
+    "Publication" : {
+      "description" : "publication object",
+      "type" : "object",
+      "properties" : {
+        "system" : {
+          "type" : "string",
+          "description" : "publication system name"
+        },
+        "id" : {
+          "type" : "string",
+          "description" : "system-specific publication identifier"
+        }
+      }
+    },
+    "EthicalApprovalIdentifier" : {
+      "description" : "ethical identifier object",
+      "type" : "object",
+      "properties" : {
+        "reviewBoardName" : {
+          "type" : "string",
+          "description" : "name of the review board"
+        },
+        "caseId" : {
+          "type" : "string",
+          "description" : "approval id"
+        }
+      }
+    },
+    "CollectionIn" : {
+      "description" : "object defining collection attributes for API input",
+      "type" : "object",
+      "properties" : {
+        "collectionIdentifier" : {
+          "type" : "string",
+          "description" : "RDM collection identifier"
+        },
+        "identifierEpic" : {
+          "type" : "string",
+          "description" : "persistent collection identifier in ePIC"
+        },
+        "identifierDOI" : {
+          "type" : "string",
+          "description" : "persistent collection identifier in DOI"
+        },
+        "projectId" : {
+          "type" : "string",
+          "description" : "identifier of associated research project"
+        },
+        "type" : {
+          "type" : "string",
+          "description" : "type of the collection"
+        },
+        "title" : {
+          "type" : "string",
+          "description" : "title of the collection"
+        },
+        "quotaInBytes" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "collection storage quota"
+        },
+        "sizeInBytes" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "collection data size in bytes"
+        },
+        "numberOfFiles" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "collection data size in number of files"
+        },
+        "preservationTimeYears" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "collection data preservation time"
+        },
+        "associatedPublication" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Publication"
+          }
+        },
+        "keyword_freetext" : {
+          "type" : "array",
+          "description" : "list of freetext keywords",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "keyword_MeSH_2013" : {
+          "type" : "array",
+          "description" : "list of MeSH keywords",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "keyword_SFN_2015" : {
+          "type" : "array",
+          "description" : "list of SFN keywords",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "dataUseAgreement" : {
+          "type" : "string",
+          "description" : "data use agreement"
+        },
+        "descriptionAbstract" : {
+          "type" : "string",
+          "description" : "abstract for collection description"
+        },
+        "creatorList" : {
+          "type" : "array",
+          "description" : "list of collection authors",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "embargoUntilDateTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "the ending datetime of the embargo period"
+        },
+        "ethicalApprovalIdentifier" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/EthicalApprovalIdentifier"
+          }
+        },
+        "manager" : {
+          "type" : "array",
+          "description" : "list of collection managers",
+          "items" : {
+            "type" : "string",
+            "description" : "iRODS username"
+          }
+        },
+        "contributor" : {
+          "type" : "array",
+          "description" : "list of collection contributors",
+          "items" : {
+            "type" : "string",
+            "description" : "iRODS username"
+          }
+        },
+        "viewer" : {
+          "type" : "array",
+          "description" : "list of collection viewers",
+          "items" : {
+            "type" : "string",
+            "description" : "iRODS username"
+          }
+        },
+        "collectionCreationDataTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "collection creation datetime in ISO format"
+        },
+        "attributeLastUpdateDateTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "the latest collection attribute update datetime in ISO format"
+        },
+        "lastClosedDataTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "the last collection closure datetime in ISO format"
+        },
+        "versionNumber" : {
+          "type" : "integer",
+          "format" : "short",
+          "description" : "version number of a collection snapshot"
+        },
+        "originalVersionId" : {
+          "type" : "integer",
+          "format" : "short",
+          "description" : "iRODS id referring to the orginal/master collection"
+        },
+        "lastVersionId" : {
+          "type" : "integer",
+          "format" : "short",
+          "description" : "iRODS id referring to the last snapshot of the collection"
+        },
+        "nextVersionId" : {
+          "type" : "integer",
+          "format" : "short",
+          "description" : "iRODS id referring to the next snapshot of the collection"
+        },
+        "previousVersionId" : {
+          "type" : "integer",
+          "format" : "short",
+          "description" : "iRODS id referring to the prevous snapshot of the collection"
+        }
+      }
+    },
+    "CollectionOut" : {
+      "description" : "collection object model for API output",
+      "allOf" : [ {
+        "$ref" : "#/definitions/CollectionIn"
+      }, {
+        "properties" : {
+          "collId" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "iRODS collection id"
+          },
+          "collName" : {
+            "type" : "string",
+            "description" : "iRODS collection namespace"
+          },
+          "manager" : {
+            "type" : "array",
+            "description" : "list of collection managers",
+            "items" : {
+              "$ref" : "#/definitions/UserReduced"
+            }
+          },
+          "contributor" : {
+            "type" : "array",
+            "description" : "list of collection contributors",
+            "items" : {
+              "$ref" : "#/definitions/UserReduced"
+            }
+          },
+          "viewer" : {
+            "type" : "array",
+            "description" : "list of collection viewers",
+            "items" : {
+              "$ref" : "#/definitions/UserReduced"
+            }
+          }
+        }
+      } ]
+    },
+    "UserReduced" : {
+      "description" : "user object containing minimum user profile",
+      "type" : "object",
+      "properties" : {
+        "displayName" : {
+          "type" : "string"
+        },
+        "irodsUserName" : {
+          "type" : "string"
+        }
+      }
+    },
+    "UserIdP" : {
+      "description" : "user object containing IdP attributes",
+      "type" : "object",
+      "properties" : {
+        "surName" : {
+          "type" : "string",
+          "description" : "IdP user surName"
+        },
+        "givenName" : {
+          "type" : "string",
+          "description" : "IdP user givenName"
+        },
+        "homeOrganisation" : {
+          "type" : "string",
+          "description" : "IdP user organisation name"
+        },
+        "email" : {
+          "type" : "string",
+          "description" : "IdP user email",
+          "format" : "email"
+        },
+        "id" : {
+          "type" : "string",
+          "description" : "IdP user id"
+        }
+      }
+    },
+    "UserIn" : {
+      "description" : "user object of operation input",
+      "allOf" : [ {
+        "$ref" : "#/definitions/UserIdP"
+      }, {
+        "properties" : {
+          "isAdminOf" : {
+            "type" : "array",
+            "description" : "list of OU's in which the user is an admin",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "organisationalUnit" : {
+            "type" : "array",
+            "description" : "list of OU's in which the user is a researcher",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "personalWebsiteUrl" : {
+            "description" : "personal homepage URL",
+            "type" : "string",
+            "format" : "url"
+          },
+          "openResearchAndContributorId" : {
+            "description" : "open research and contributor id",
+            "type" : "string"
+          },
+          "researcherId" : {
+            "description" : "research id",
+            "type" : "string"
+          }
+        }
+      } ]
+    },
+    "UserOut" : {
+      "description" : "user object for operation output",
+      "allOf" : [ {
+        "$ref" : "#/definitions/UserIn"
+      }, {
+        "properties" : {
+          "irodsUserName" : {
+            "type" : "string",
+            "description" : "iRODS username"
+          },
+          "attributeLastUpdatedDateTime" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "last attribute update datetime in ISO format"
+          }
+        }
+      } ]
+    },
+    "Query" : {
+      "description" : "query clause",
+      "type" : "object",
+      "properties" : {
+        "query" : {
+          "type" : "object"
+        }
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "basicAuth" : {
+      "type" : "basic"
+    }
+  },
+  "host" : "virtserver.swaggerhub.com",
+  "basePath" : "/hurngchunlee/DRDR_REST/1.0.0",
+  "schemes" : [ "https" ]
+}
